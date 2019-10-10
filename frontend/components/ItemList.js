@@ -21,7 +21,7 @@ const Center = styled.div`
   text-align: center;
 `;
 
-const ItemList = styled.div`
+const ListWrapper = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-gap: 60px;
@@ -29,15 +29,15 @@ const ItemList = styled.div`
   margin: 0 auto;
 `;
 
-class Items extends Component {
+class ItemList extends Component {
 
   renderItems(items) {
     const els =  items.map(item => <Item key={item.id} item={item} /> );
 
     return (
-      <ItemList>
+      <ListWrapper>
         { els }
-      </ItemList>
+      </ListWrapper>
     );
   }
 
@@ -60,4 +60,4 @@ class Items extends Component {
   }
 }
 
-export default Items;
+export default ItemList;
