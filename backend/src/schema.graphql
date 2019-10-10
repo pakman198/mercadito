@@ -1,7 +1,17 @@
+# Anything that we want to make visible inside the API must be in this file
+# these are the endpoints available to the React application
+
+# import * from './generated/prisma.graphql'
+
 type Mutation {
-  todo: String
+  createItem(
+    title: String, 
+    description: String, 
+    price: Int, 
+    image: String, 
+    largeImage: String): Item! 
 }
 
 type Query {
-  todo: String
+  items: [Item]!
 }
