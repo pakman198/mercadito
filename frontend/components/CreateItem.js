@@ -42,6 +42,28 @@ class CreateItem extends Component {
     this.setState({ [name]: val })
   }
 
+  uploadFile = async (e) => {
+    const { files } = e.target;
+    
+    if(!files.length) return;
+    
+    console.log('Uploading file...')
+    const data = new FormData();
+    data.append('file', files[0]);
+    data.append('upload_preset', 'sickfits');
+
+    const res = await fetch('https://api.cloudinary.com/v1_1/di7tenpwx/image/upload', {
+      method: 'POST',
+      body: data
+    });
+    const { secure_url, eager } = await res.json();
+
+    this.setState({
+      image: secure_url,
+      largeImage: eager[0].secure_url
+    });
+  }
+
   handleSubmit = async (e, gqlMutation) => {
     e.preventDefault();
     const res = await gqlMutation();
@@ -53,10 +75,22 @@ class CreateItem extends Component {
   }
 
   renderForm(createItem, loading) {
+    const { image } = this.state;
     return (
       <Form onSubmit={(e) => this.handleSubmit(e, createItem)}>
         <h2>Sell an Item</h2>
         <fieldset disabled={loading} aria-busy={loading}>
+        <label htmlFor="file">
+            Image
+            <input 
+              type="file"
+              id="file"
+              placeholder="Upload an image"
+              onChange={this.uploadFile}
+            />
+            { image && <img src={image} alt="Upload Preview" width="200" /> }
+          </label>
+
           <label htmlFor="title">
             Title
             <input 
