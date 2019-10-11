@@ -80,7 +80,7 @@ class CreateItem extends Component {
       <Form onSubmit={(e) => this.handleSubmit(e, createItem)}>
         <h2>Sell an Item</h2>
         <fieldset disabled={loading} aria-busy={loading}>
-        <label htmlFor="file">
+          <label htmlFor="file">
             Image
             <input 
               type="file"
