@@ -1,9 +1,9 @@
 import ItemList from '../components/ItemList';
 
 const Home = props => (
-  <div>
-    <ItemList />
-  </div>
+  <>
+    <ItemList page={+props.query.page || 1} />
+  </>
 );
 
 export default Home;

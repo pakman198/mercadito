@@ -48,7 +48,7 @@ class SingleItem extends Component {
       <SingleItemWrapper>
         
         <Head>
-          <title>Sick Fits | { item.title }</title>
+          <title>Mercadito! | { item.title }</title>
         </Head>
         <img src={item.largeImage} alt={item.title} />
         <div className="details">
