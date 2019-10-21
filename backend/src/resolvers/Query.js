@@ -13,7 +13,6 @@ const Query = {
   item: forwardTo('db'),
   itemsConnection: forwardTo('db'),
   me(parent, args, ctx, info) {
-    console.log('userId', ctx.request.userId)
     if(!ctx.request.userId) {
       return null;
     }

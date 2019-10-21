@@ -27,11 +27,24 @@ type Mutation {
   signup(email: String!, password: String!, name: String!): User
   signin(email: String!, password: String!): User!
   signout: OperationMessage
+  requestReset(email: String!): OperationMessage
+  resetPassword(resetToken: String!, password: String!, confirmPassword: String!): User!
 }
 
 type Query {
   items(where: ItemWhereInput, orderBy: ItemOrderByInput, skip: Int, first: Int): [Item]!
   item(where: ItemWhereUniqueInput!): Item
-  itemsConnection(where: ItemWhereInput): ItemConnection!
+  itemsConnection(where: ItemWhereInput): ItemConnection!  
   me: User
+}
+
+# User is defined here (GraphQL Yoga) because there are certain fields from our datamodel
+# that we dont want to expose for security issues, in this case: resetToken and resetTokenExpiry
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  password: String
+  permissions: [Permission!]!
 }

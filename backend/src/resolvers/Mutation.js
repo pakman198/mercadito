@@ -1,5 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { randomBytes } = require('crypto');
+const { promisify } = require('util');
 
 const tokenGeneration = (context, userId) => {
   const token = jwt.sign({ userId }, process.env.APP_SECRET);
@@ -82,6 +84,70 @@ const Mutations = {
     return {
       message: 'Signed out successfully'
     }
+  },
+
+  async requestReset(parent, args, ctx, info) {
+    console.log({ args })
+    // 1. Validate the user
+    const user = await ctx.db.query.user({
+      where: { email: args.email }
+    });
+
+    if(!user) {
+      throw new Error(`No user found for email: ${args.email}`)
+    }
+    // 2. Set the token and expiration
+    const random = promisify(randomBytes);
+    const token =  (await random(20)).toString('hex');
+    const tokenExpiration = Date.now() + 3600000; // 1 hour form now
+    const res = await ctx.db.mutation.updateUser({
+      where: { email: args.email },
+      data: {
+        resetToken: token,
+        resetTokenExpiry: tokenExpiration
+      }
+    });
+
+    console.log({ res })
+    return { message: 'Thanks'};
+    // 3. Send the token via email
+  },
+
+  async resetPassword(parent, args, ctx, info) {
+    console.log({ args })
+    if(args.password !== args.confirmPassword) {
+      throw new Error("Your passwords don't match");
+    }
+    
+    // // 1. validate token and expiration
+    const [ user ] = await ctx.db.query.users({
+      where: {
+        resetToken: args.resetToken,
+        resetTokenExpiry_gte: Date.now() - 3600000
+      }
+    });
+
+    if(!user) {
+      throw new Error('This token is either invalid or expired');
+    }
+
+    // 2. hash password
+    const password = await bcrypt.hash(args.password, 10);
+
+    // 3. save new password and remove token expiration fields
+    const updatedUser = await ctx.db.mutation.updateUser({
+      where: { email: user.email },
+      data: {
+        password,
+        resetToken: null,
+        resetTokenExpiry: null
+      }
+    });
+
+    // 4. generate JWT and set cookie
+    tokenGeneration(ctx, user.id);
+
+    return updatedUser;
   }
 };
 

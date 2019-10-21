@@ -17,7 +17,7 @@ const User = (props) => (
   <Query {...props} query={CURRENT_USER_QUERY}>
     {
       (payload) => {
-        console.log('User', { payload })
+        // console.log('User', { payload })
         return props.children(payload);
       }
     }
