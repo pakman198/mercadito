@@ -74,6 +74,14 @@ const Mutations = {
     tokenGeneration(ctx, user.id);
 
     return user;
+  },
+
+  signout(parent, args, ctx, info) {
+    console.log('ctx.response', ctx.resopnse);
+    ctx.response.clearCookie('token');
+    return {
+      message: 'Signed out successfully'
+    }
   }
 };
 
