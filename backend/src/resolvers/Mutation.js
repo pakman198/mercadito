@@ -15,9 +15,18 @@ const tokenGeneration = (context, userId) => {
 
 const Mutations = {
   async createItem(parent, args, ctx, info) {
-    // TODO check if login
+    if(!ctx.request.userId) {
+      throw new Error('You must be logged in to complete this operation')
+    }
+
     const item = await ctx.db.mutation.createItem({ 
-      data: { ...args}
+      data: {
+        // this is a db relation
+        user: {
+          connect: { id: ctx.request.userId }
+        },
+        ...args
+      }
     }, info);
 
     return item;
