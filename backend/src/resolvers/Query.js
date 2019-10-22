@@ -1,17 +1,12 @@
 const { forwardTo } = require('prisma-binding');
+const { hasPermission } = require('../utils');
 
 const Query = {
-  // async items(parent, args, ctx, info) {
-  //   // TODO check if login
-  //   const items =  await ctx.db.query.items();
-
-  //   return items;
-  // }
-
   // db is the context we defined when we created the server (createServer.js)
   items: forwardTo('db'),
   item: forwardTo('db'),
   itemsConnection: forwardTo('db'),
+  
   me(parent, args, ctx, info) {
     if(!ctx.request.userId) {
       return null;
@@ -22,6 +17,16 @@ const Query = {
         id: ctx.request.userId 
       }
     }, info)
+  },
+  
+  async users(parent, args, ctx, info) {
+    if(!ctx.request.userId) {
+      throw new Error('You must be logged in')
+    }
+
+    hasPermission(ctx.request.user, ['ADMIN', 'PERMISSION_UPDATE'])
+
+    return ctx.db.query.users({}, info);
   }
 };
 

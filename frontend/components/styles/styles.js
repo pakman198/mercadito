@@ -38,4 +38,8 @@ export const GlobalStyle = createGlobalStyle`
     text-decoration: none;
     color: ${theme.black};
   }
+
+  button:hover {
+    cursor: pointer;
+  }
 `;
