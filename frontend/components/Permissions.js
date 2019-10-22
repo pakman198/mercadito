@@ -27,6 +27,35 @@ const ALL_USERS_QUERY = gql`
 `;
 
 const Permissions = props  => {
+
+  const renderTable = (data) => {
+    if (!data) return null;
+
+    return (
+      <Table>
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            { 
+              possiblePermissions.map((permission, index) => (
+                <th key={index}>{ permission }</th>
+              ))
+            }
+            <th>&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody>
+          { 
+            data && data.users.map(user => (
+              <User key={user.id} user={user} />
+            ))
+          }
+        </tbody>
+      </Table>
+    );
+  } 
+
   return (
     <Query query={ALL_USERS_QUERY}>
       {
@@ -36,27 +65,7 @@ const Permissions = props  => {
               <Error error={error} />
               <div>
                 <h2>Manage Permissions</h2>
-                <Table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Email</th>
-                      { 
-                        possiblePermissions.map((permission, index) => (
-                          <th key={index}>{ permission }</th>
-                        ))
-                      }
-                      <th>&nbsp;</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    { 
-                      data && data.users.map(user => (
-                        <User key={user.id} user={user} />
-                      ))
-                    }
-                  </tbody>
-                </Table>
+                { renderTable(data) }
               </div>
             </div>
           );
@@ -71,18 +80,20 @@ const User = ({ user }) => {
     <tr>
       <td>{ user.name }</td>
       <td>{ user.email }</td>
-      { possiblePermissions.map((p,i) => (
-        <td key={i}>
-          <label htmlFor={`${user.name}-permission-${p}`}>
-            <input type="checkbox"/>
-          </label>
-        </td>
-      )) }
+      { 
+        possiblePermissions.map((p,i) => (
+          <td key={i}>
+            <label htmlFor={`${user.name}-permission-${p}`}>
+              <input type="checkbox"/>
+            </label>
+          </td>
+        ))
+      }
       <td>
         <SickButton>Update</SickButton>
       </td>
     </tr>
-  )
+  );
 }
 
 export default Permissions;
