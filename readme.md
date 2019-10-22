@@ -1,5 +1,16 @@
 ![Advanced React & GraphQL](https://advancedreact.com/images/ARG/arg-facebook-share.png)
 
+Creation of an ecommerce website from scratch using:
+* React 
+* Nextjs - React framework for server side rendered applications 
+* Apollo
+* GraphQL.
+
+Used external services:
+* [Cloudinary](https://cloudinary.com) - image hosting
+* [Prisma](https://www.prisma.io/) - Database ORM / GraphQL Server
+* [Mailtrap](https://mailtrap.io/) - SMTP server for email testing
+
 # Advanced React & GraphQL
 
 These are the starter files and stepped solutions for the [Advanced React & GraphQL](https://AdvancedReact.com) course by [Wes Bos](https://WesBos.com/).

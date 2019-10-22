@@ -2,6 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { randomBytes } = require('crypto');
 const { promisify } = require('util');
+const { transport, makeEmail } = require('../mail');
 
 const tokenGeneration = (context, userId) => {
   const token = jwt.sign({ userId }, process.env.APP_SECRET);
@@ -108,9 +109,22 @@ const Mutations = {
       }
     });
 
-    console.log({ res })
-    return { message: 'Thanks'};
     // 3. Send the token via email
+    try {
+      const mailResponse = await transport.sendMail({
+        from: 'no-reply@mercadito.com',
+        to: user.email,
+        subject: 'Your password reset token',
+        html: makeEmail(`
+          Your password reset token ! \n\n
+          <a href="${process.env.FRONTEND_URL}/reset?resetToken=${token}">Click here to reset</a>
+        `)
+      });
+    } catch(e) {
+      throw new Error('Sorry, something went wrong. PLease try again later.');
+    }
+    
+    return { message: 'Thanks'};
   },
 
   async resetPassword(parent, args, ctx, info) {
