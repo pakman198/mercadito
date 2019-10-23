@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const { randomBytes } = require('crypto');
 const { promisify } = require('util');
 const { transport, makeEmail } = require('../mail');
+const { hasPermission } = require('../utils');
 
 const tokenGeneration = (context, userId) => {
   const token = jwt.sign({ userId }, process.env.APP_SECRET);
@@ -13,11 +14,15 @@ const tokenGeneration = (context, userId) => {
   });
 }
 
+const validateUser = (userId) => {
+  if(!userId) {
+    throw new Error('You must be logged in to complete this operation')
+  }
+}
+
 const Mutations = {
   async createItem(parent, args, ctx, info) {
-    if(!ctx.request.userId) {
-      throw new Error('You must be logged in to complete this operation')
-    }
+    validateUser(ctx.request.userId);
 
     const item = await ctx.db.mutation.createItem({ 
       data: {
@@ -44,8 +49,18 @@ const Mutations = {
   async deleteItem(parent, args, ctx, info) {
     const where = { id: args.id };
     // 1. find the item
-    const item = await ctx.db.query.item({ where }, `{ id title}`)
-    // 2. TODO check ownership
+    const item = await ctx.db.query.item({ where }, `{ id title user { id } }`)
+    
+    // 2. check ownership
+    const owner = item.user.id === ctx.request.userId;
+    const permissions = ctx.request.user.permissions.some(
+      p => ['ADMIN', 'ITEM_DELETE'].includes(p)
+    );
+    
+    if(!owner && !permissions) {
+      throw new Error("You don't have permission to complete this operation");
+    }
+
     // 3. delete item
     return ctx.db.mutation.deleteItem({ where }, info);
   },
@@ -89,7 +104,6 @@ const Mutations = {
   },
 
   signout(parent, args, ctx, info) {
-    console.log('ctx.response', ctx.resopnse);
     ctx.response.clearCookie('token');
     return {
       message: 'Signed out successfully'
@@ -171,6 +185,29 @@ const Mutations = {
     tokenGeneration(ctx, user.id);
 
     return updatedUser;
+  },
+
+  async updatePermissions(parent, args, ctx, info) {
+    const { userId } = ctx.request;
+    validateUser(userId);
+
+    // Apparently the second parameter was necessary because permissions is of a special type.
+    // Seems that fields with contraints and special types are not shown in the query
+    // On signin mutation we query for user and only get back id, email, name and password 
+    const user = await ctx.db.query.user(
+      { where: { id: userId }},
+      '{ id, email, name, permissions }', 
+      info
+    );
+
+    hasPermission(user,  ['ADMIN', 'PERMISSION_UPDATE']);
+
+    return ctx.db.mutation.updateUser({
+      data: {
+        permissions: { set: args.permissions }
+      },
+      where: { id: args.userId }
+    })
   }
 };
 
