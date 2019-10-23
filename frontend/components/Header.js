@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import Router from 'next/router';
 import NProgress from 'nprogress';
 
+import Cart from './Cart';
+
 const Logo = styled.h1`
   font-size: 4rem;
   margin-left: 2rem;
@@ -69,7 +71,7 @@ const Header = () => (
     <div className="sub-bar">
       <p>Search</p>
     </div>
-    <div>Cart</div>
+    <Cart />
   </StyledHeader>
 );
 
