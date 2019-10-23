@@ -192,7 +192,7 @@ const Mutations = {
     validateUser(userId);
 
     // Apparently the second parameter was necessary because permissions is of a special type.
-    // Seems that fields with contraints and special types are not shown in the query
+    // Seems that fields with contraints and special types are not shown in the query.
     // On signin mutation we query for user and only get back id, email, name and password 
     const user = await ctx.db.query.user(
       { where: { id: userId }},
@@ -207,6 +207,34 @@ const Mutations = {
         permissions: { set: args.permissions }
       },
       where: { id: args.userId }
+    })
+  },
+
+  async addToCart(parent, args, ctx, info) {
+    const { userId } = ctx.request;
+    validateUser(userId);
+
+    const [ existingItem ] = await ctx.db.query.cartItems({
+      where: {
+        user: { id: userId },
+        item: { id: args.id }
+      }
+    });
+
+    if(existingItem) {
+      return ctx.db.mutation.updateCartItem({
+        where: { id: existingItem.id },
+        data: {
+          quantity: existingItem.quantity + 1
+        }
+      })
+    }
+
+    return ctx.db.mutation.createCartItem({
+      data: {
+        user: { connect: { id: userId }},
+        item: { connect: { id: args.id }}
+      }
     })
   }
 };
