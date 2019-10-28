@@ -32,9 +32,6 @@ class RemoveFromCart extends Component {
   // @payload: param returned form GraphQL operation
   update(cache, payload) {
     const data = cache.readQuery({ query: CURRENT_USER_QUERY });
-    console.log('runnign update fn')
-    console.log({ data });
-
     const cartItemId = payload.data.removeFromCart.id;
     data.me.cart = data.me.cart.filter(cartItem => cartItem.id !== cartItemId);
     cache.writeQuery({ query: CURRENT_USER_QUERY, data});
