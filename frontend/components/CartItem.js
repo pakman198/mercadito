@@ -24,6 +24,13 @@ const CartItemContainer = styled.li`
 const CartItem = ({data}) => {
   const { item } = data;
 
+  if(!item) return (
+    <CartItemContainer>
+      <p>This item has been removed</p>
+      <RemoveFromCart id={data.id} />
+    </CartItemContainer>
+  );
+
   return (
     <CartItemContainer>
       <img src={item.image} alt={item.description} height="100" />
