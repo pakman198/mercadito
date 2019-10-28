@@ -235,7 +235,26 @@ const Mutations = {
         user: { connect: { id: userId }},
         item: { connect: { id: args.id }}
       }
-    })
+    });
+  },
+
+  async removeFromCart(parent, args, ctx, info) {
+    const cartItem = await ctx.db.query.cartItem(
+      { where: { id: args.id }}, 
+      `{ id user { id }}`
+    );
+
+    if(!cartItem) throw new Error('No cart item found!');
+    
+    const { id } = cartItem.user;
+    const { userId } = ctx.request;
+    if(id !== userId) throw new Error("This operation can't be completed");
+
+    return ctx.db.mutation.deleteCartItem({
+      where: {
+        id: args.id
+      }
+    }, info);
   }
 };
 
