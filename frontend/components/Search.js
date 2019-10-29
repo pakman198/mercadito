@@ -46,14 +46,18 @@ class Search extends Component {
     })
   }, 350);
 
-  renderItems() {
+  renderItems(getItemProps, highlightedIndex) {
     const { items } = this.state;
 
     if(items.length == 0) return null;
 
-    return items.map(item => {
+    return items.map((item, index) => {
       return (
-        <DropDownItem key={item.id}>
+        <DropDownItem 
+          key={item.id} 
+          {...getItemProps({ item })}
+          highlighted={index === highlightedIndex }
+        >
           <img height="50" src={item.image} alt={item.title} />
           { item.title }
         </DropDownItem>
@@ -61,20 +65,70 @@ class Search extends Component {
     });
   }
 
+  displayItem(item) {
+    console.log({ item })
+
+    Router.push({
+      pathname: '/item',
+      query: {
+        id: item.id
+      }
+    })
+  }
+
   render() {
+    const { items, loading } = this.state;
+
     return (
       <SearchStyles>
-        <ApolloConsumer>
+        <Downshift 
+          onChange={this.displayItem}
+          itemToString={item => item === null ? '' : item.title}
+        >
           {
-            (client) => <input type="search" onChange={(e) => {
-              e.persist();
-              this.handleChange(e, client)
-            }} />
+            (payload) => {
+              const { getInputProps, getItemProps, isOpen, inputValue, highlightedIndex } = payload;
+
+              return (
+                <div>
+                  <ApolloConsumer>
+                    { 
+                      client => {
+                        const inputProps = {
+                          type:'search',
+                          placeholder: 'Search for item',
+                          id: 'search',
+                          className: this.state.isLoading ? 'loading' : null,
+                          onChange: (e) => {
+                            e.persist();
+                            this.handleChange(e, client)
+                          }
+                        }
+
+                        return <input {...getInputProps(inputProps)} />
+                      }  
+                    }
+                  </ApolloConsumer>
+                  {
+                    isOpen && (
+                      <DropDown>
+                        { this.renderItems(getItemProps, highlightedIndex, inputValue) }
+                        { 
+                          !items.length && !loading && (
+                            <DropDownItem>
+                              Nothing found for { inputValue }
+                            </DropDownItem>
+                          )
+                        }
+                      </DropDown>
+                    )
+                  }
+                </div>
+              );
+
+            }
           }
-        </ApolloConsumer>
-        <DropDown>
-          { this.renderItems() }
-        </DropDown>
+        </Downshift>
       </SearchStyles>
     );
   }
