@@ -5,6 +5,7 @@ import Router from 'next/router';
 import NProgress from 'nprogress';
 
 import Cart from './Cart';
+import Search from './Search';
 
 const Logo = styled.h1`
   font-size: 4rem;
@@ -43,7 +44,7 @@ const StyledHeader = styled.header`
 
   .sub-bar {
     display: grid;
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto;
     border-bottom: 1px solid ${props => props.theme.lightGrey};
   }
 `;
@@ -69,7 +70,7 @@ const Header = () => (
       <Nav />
     </div>
     <div className="sub-bar">
-      <p>Search</p>
+      <Search />
     </div>
     <Cart />
   </StyledHeader>
