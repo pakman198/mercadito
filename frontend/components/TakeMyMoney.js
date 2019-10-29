@@ -10,6 +10,20 @@ import User, { CURRENT_USER_QUERY } from './User';
 
 import calcTotalPrice from '../lib/calcTotalPrice';
 
+const CREATE_ORDER_MUTATION = gql`
+  mutation CREATE_ORDER_MUTATION($token: String!) {
+    createOrder(token: $token) {
+      id
+      charge
+      total
+      items {
+        id
+        title
+      }
+    }
+  }
+`;
+
 const totalItems = (cart) => {
   return  cart.reduce((acc, curr) => {
     return acc + curr.quantity;
@@ -18,8 +32,16 @@ const totalItems = (cart) => {
 
 class TakeMyMoney extends Component {
 
-  onToken(token) {
-    console.log({token})
+  async onToken(token, mutation) {
+    const order = await mutation({
+      variables: {
+        token: token.id
+      }
+    }).catch(err => {
+      alert(err.message);
+    });
+
+    console.log({ order })
   }
 
   render() {
@@ -27,20 +49,30 @@ class TakeMyMoney extends Component {
       <User>
         {
           ({data: { me }}) => {
-            console.log({ me });
             return (
-              <StripeChekout
-                amount={calcTotalPrice(me.cart)}
-                name="Mercadito"
-                description={`Order of ${totalItems(me.cart)} items`}
-                image={ me.cart[0].item && me.cart[0].item.image }
-                stripeKey="pk_test_EHsVZCCA8VZjCSqTvHvi8BVs00Vi9E2HxV"
-                currency="USD"
-                email={me.email}
-                token={res => this.onToken(res )}
+              <Mutation 
+                mutation={CREATE_ORDER_MUTATION} 
+                refetchQueries={[{query: CURRENT_USER_QUERY}]}
               >
-                {this.props.children}
-              </StripeChekout>
+                {
+                  (createOrder) => {
+                    return (
+                      <StripeChekout
+                        amount={calcTotalPrice(me.cart)}
+                        name="Mercadito"
+                        description={`Order of ${totalItems(me.cart)} items`}
+                        image={ me.cart[0].item && me.cart[0].item.image }
+                        stripeKey="pk_test_EHsVZCCA8VZjCSqTvHvi8BVs00Vi9E2HxV"
+                        currency="USD"
+                        email={me.email}
+                        token={res => this.onToken(res, createOrder)}
+                      >
+                        {this.props.children}
+                      </StripeChekout>
+                    )
+                  }
+                }
+              </Mutation>
             );
           }
         }

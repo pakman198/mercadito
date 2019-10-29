@@ -4,6 +4,7 @@ const { randomBytes } = require('crypto');
 const { promisify } = require('util');
 const { transport, makeEmail } = require('../mail');
 const { hasPermission } = require('../utils');
+const stripe = require('../stripe');
 
 const tokenGeneration = (context, userId) => {
   const token = jwt.sign({ userId }, process.env.APP_SECRET);
@@ -191,7 +192,7 @@ const Mutations = {
     const { userId } = ctx.request;
     validateUser(userId);
 
-    // Apparently the second parameter was necessary because permissions is of a special type.
+    // The second parameter specifies the data you want from that query.
     // Seems that fields with contraints and special types are not shown in the query.
     // On signin mutation we query for user and only get back id, email, name and password 
     const user = await ctx.db.query.user(
@@ -255,6 +256,76 @@ const Mutations = {
         id: args.id
       }
     }, info);
+  },
+
+  async createOrder(parent, args, ctx, info) {
+    // 1. query user
+    const { userId } = ctx.request;
+    validateUser(userId);
+    const user = await ctx.db.query.user(
+      { where: { id: userId }},
+      `{ 
+        id
+        email
+        name
+        cart {
+          id
+          quantity
+          item {
+            title
+            price
+            id
+            description
+            image
+            largeImage
+          }
+        }
+      }`
+    );
+    // 2. recalculate total
+    const amount = user.cart.reduce((tally, cartItem) => {
+      return tally + cartItem.item.price * cartItem.quantity
+    }, 0);
+    
+    // 3. create stripe charge
+    const charge = await stripe.charges.create({
+      amount,
+      currency: "USD",
+      source: args.token
+    }) 
+    // 4. convert cartItems to orderItems
+    const orderItems = user.cart.map(cartItem => {
+      const orderItem = {
+        ...cartItem.item,
+        quantity: cartItem.quantity,
+        user: { connect: { id: userId }},
+      }
+
+      delete orderItem.id;
+
+      return orderItem;
+    });
+    
+    // 5. create order
+    const order = await ctx.db.mutation.createOrder({
+      data: {
+        total: charge.amount,
+        charge: charge.id,
+        // the _create_ automatically adds the orderItems to the db, instead of
+        // having to generate them via a mutation and then create the order 
+        items: { create: orderItems },
+        user: { connect: { id: userId }}
+      }
+    })
+    
+    // 6. clear cart
+    const cartItems = user.cart.map(item => item.id);
+    await ctx.db.mutation.deleteManyCartItems({
+      where: { id_in: cartItems}
+    });
+    
+    // 7 return order to user
+    return order;
   }
 };
 
