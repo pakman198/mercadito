@@ -4,12 +4,14 @@ Creation of an ecommerce website from scratch using:
 * React 
 * Nextjs - React framework for server side rendered applications 
 * Apollo
-* GraphQL.
+* GraphQL
+* Downshift 
 
 Used external services:
 * [Cloudinary](https://cloudinary.com) - image hosting
 * [Prisma](https://www.prisma.io/) - Database ORM / GraphQL Server
 * [Mailtrap](https://mailtrap.io/) - SMTP server for email testing
+* [Stripe](https://stripe.com/) - Service for online payments
 
 # Advanced React & GraphQL
 
