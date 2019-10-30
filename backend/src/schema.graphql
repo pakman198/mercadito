@@ -41,6 +41,7 @@ type Query {
   itemsConnection(where: ItemWhereInput): ItemConnection!  
   me: User,
   users: [User]!
+  order(id: ID!): Order
 }
 
 # User is defined here (GraphQL Yoga) because there are certain fields from our datamodel
