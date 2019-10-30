@@ -1,6 +1,12 @@
 const { forwardTo } = require('prisma-binding');
 const { hasPermission } = require('../utils');
 
+const validateUser = (userId) => {
+  if(!userId) {
+    throw new Error('You must be logged in')
+  }
+}
+
 const Query = {
   // db is the context we defined when we created the server (createServer.js)
   items: forwardTo('db'),
@@ -20,9 +26,9 @@ const Query = {
   },
   
   async users(parent, args, ctx, info) {
-    if(!ctx.request.userId) {
-      throw new Error('You must be logged in')
-    }
+    const { userId } = ctx.request;
+
+    validateUser(userId)
 
     hasPermission(ctx.request.user, ['ADMIN', 'PERMISSION_UPDATE'])
 
@@ -31,10 +37,8 @@ const Query = {
 
   async order(parent, args, ctx, info) {
     const { userId } = ctx.request;
-    
-    if(!userId) {
-      throw new Error('You must be logged in')
-    }
+
+    validateUser(userId)
 
     const order = await ctx.db.query.order({
       where: { id: args.id }
@@ -47,6 +51,22 @@ const Query = {
     }
 
     return order;
+  },
+
+  async orders(parent, args, ctx, info) {
+    const { userId } = ctx.request;
+
+    validateUser(userId);
+
+    console.log({userId})
+    
+    const orders = await ctx.db.query.orders({
+      where: { 
+        user: { id: userId }
+      }
+    }, info);
+
+    return orders;
   }
 };
 

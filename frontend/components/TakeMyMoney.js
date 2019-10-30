@@ -33,6 +33,8 @@ const totalItems = (cart) => {
 class TakeMyMoney extends Component {
   async onToken(token, mutation) {
     NProgress.start();
+    this.props.toggleCart();
+
     const order = await mutation({
       variables: {
         token: token.id
@@ -41,7 +43,7 @@ class TakeMyMoney extends Component {
       alert(err.message);
     });
 
-    console.log({ order })
+    // console.log({ order })
     Router.push({
       pathname: '/order',
       query: { id: order.data.createOrder.id}

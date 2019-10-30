@@ -57,7 +57,7 @@ const Cart = () => {
                     <p>{ formatMoney(calcTotalPrice(userData.cart)) }</p>
                     {
                       userData.cart.length && (
-                        <TakeMyMoney>
+                        <TakeMyMoney toggleCart={toggleCart}>
                           <SickButton>Checkout</SickButton>
                         </TakeMyMoney>
                       )
