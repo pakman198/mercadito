@@ -77,8 +77,8 @@ const Cart = () => {
       {
         ({data}) => {
           if(!data) return null;
-
-          return renderCart(data.me);
+          
+          return data.me ? renderCart(data.me) : null;
         }
       }
     </User>

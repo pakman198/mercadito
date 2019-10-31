@@ -14,6 +14,15 @@ const ADD_TO_CART_MUTATION = gql`
 `;
 
 class AddToCart extends Component {
+  
+  handleClick = (e, mutation) => {
+    mutation().catch(e => {
+      const { message } = e.graphQLErrors[0];
+
+      alert(message)
+    })
+  }
+  
   render() {
     const variables = {
       id: this.props.id
@@ -28,7 +37,7 @@ class AddToCart extends Component {
         {
           (addToCart, {loading}) => (
             <button 
-              onClick={addToCart}
+              onClick={(e) => this.handleClick(e, addToCart)}
               disabled={loading}
             >Add{ loading ? 'ing' : null } to cart 🛒</button>
           )
