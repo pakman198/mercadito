@@ -13,7 +13,7 @@ function createClient({ headers }) {
           credentials: 'include',
         },
         headers: {
-          cookie: headers && headers.cookie // NOTE: client-side headers is undefined!
+          cookie: headers && headers.cookie
         },
       });
     },

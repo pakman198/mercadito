@@ -37,7 +37,7 @@ server.express.use(async (req, res, next) => {
 server.start({
   cors: {
     credentials: true,
-    origin: process.env.FRONTEND_URL
+    origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URL_MIRROR ]
   }
 }, env => { 
   console.log(`Server running on http://localhost:${env.port}`);
