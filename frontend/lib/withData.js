@@ -12,7 +12,9 @@ function createClient({ headers }) {
         fetchOptions: {
           credentials: 'include',
         },
-        headers,
+        headers: {
+          cookie: headers && headers.cookie // NOTE: client-side headers is undefined!
+        },
       });
     },
     // this property works more or less like the store. Instead of methods for setting/updating 
