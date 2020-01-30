@@ -17,7 +17,7 @@ function createClient({ headers }) {
         },
       });
     },
-    // this property works more or less like the store. Instead of methods for setting/updating 
+    // this property works more or less like the redux-store. Instead of methods for setting/updating 
     // the state, we use Mutations. On the defaults we baically set the initial state 
     clientState: {
       resolvers: {
